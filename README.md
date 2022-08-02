@@ -1,2 +1,2 @@
-# reactive-java
-This repository is a Reactive Java educational repository.
+# Reactive Java
+This repository is composed for educational training purpose. It follows Reactive Java principles by using Project Reactor
