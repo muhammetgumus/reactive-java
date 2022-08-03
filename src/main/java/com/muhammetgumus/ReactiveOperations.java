@@ -72,6 +72,8 @@ public class ReactiveOperations {
         //You could change combinator as you wish like Tuples etc. But here I used BiFunction takes two parameters
         BiFunction<String, String, String> combinator = (first, second) -> first + second;
         return Flux.zip(firstFlux, secondFlux, combinator).log();
+        // return the same result
+        // return firstFlux.zipWith(secondFlux).map(a-> a.getT1()+a.getT2()).log();
     }
 
 }
