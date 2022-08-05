@@ -2,6 +2,7 @@ package com.muhammetgumus;
 
 import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 public class ReactiveExceptionHandlingTest extends TestCase {
@@ -40,8 +41,22 @@ public class ReactiveExceptionHandlingTest extends TestCase {
     @Test
     public void doOnErrorExample() {
         StepVerifier.create(ReactiveExceptionHandling.doOnErrorExample())
-                .expectNext("Person1","Person2","Person3")
+                .expectNext("Person1", "Person2", "Person3")
                 .expectError(Exception.class)
                 .verify();
     }
+
+    @Test
+    public void monoOnErrorContinue_JustCompleteSignal() {
+        StepVerifier.create(ReactiveExceptionHandling.monoOnErrorContinue("abc"))
+                .verifyComplete();
+    }
+
+    @Test
+    public void monoOnErrorContinue_Passed() {
+        StepVerifier.create(ReactiveExceptionHandling.monoOnErrorContinue("reactor"))
+                .expectNext("reactor")
+                .verifyComplete();
+    }
+
 }

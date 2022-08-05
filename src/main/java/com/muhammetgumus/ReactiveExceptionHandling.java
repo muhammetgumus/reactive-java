@@ -1,8 +1,11 @@
 package com.muhammetgumus;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public class ReactiveExceptionHandling {
+    public static String testMonoString = "abc";
+
     public static void main(String[] args) {
 
     }
@@ -59,10 +62,23 @@ public class ReactiveExceptionHandling {
         //doOnError does not recover the remained parts it just catches error and then propagates it. It likes basic try-catch
         return fluxGenerator()
                 .concatWith(Flux.error(new Exception("This is test exception")))
-                .doOnError((err)->{
+                .doOnError((err) -> {
                     System.out.println("Error occurred : While catching error in here you could add your logic here");
                 })
                 .log();
+    }
+
+    public static Mono<String> monoOnErrorContinue(String monoString) {
+        Mono<String> abcMono = Mono.just(monoString);
+        return abcMono.map(x -> {
+            if ("abc".equals(x)) {
+                throw new RuntimeException("Not appropriate!!");
+            }
+            return x;
+        }).onErrorContinue((err, abcString) -> {
+            System.out.println("Error is : " + err.getMessage());
+            System.out.println("Element is : " + abcString);
+        }).log();
     }
 
 
