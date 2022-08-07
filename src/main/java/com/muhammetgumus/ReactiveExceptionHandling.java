@@ -4,11 +4,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class ReactiveExceptionHandling {
-    public static String testMonoString = "abc";
+    private FakeServiceForTestReason fakeService;
 
-    public static void main(String[] args) {
-
+    public ReactiveExceptionHandling(FakeServiceForTestReason fakeService) {
+        this.fakeService = fakeService;
     }
+
+    public static void main(String[] args) {}
 
     public static Flux<String> fluxGenerator() {
         return Flux.just("Person1", "Person2", "Person3");
@@ -70,16 +72,22 @@ public class ReactiveExceptionHandling {
 
     public static Mono<String> monoOnErrorContinue(String monoString) {
         Mono<String> abcMono = Mono.just(monoString);
-        return abcMono.map(x -> {
+        return abcMono.flatMap(x -> {
             if ("abc".equals(x)) {
                 throw new RuntimeException("Not appropriate!!");
             }
-            return x;
+            return Mono.just(x);
         }).onErrorContinue((err, abcString) -> {
             System.out.println("Error is : " + err.getMessage());
             System.out.println("Element is : " + abcString);
         }).log();
     }
 
-
+    public Flux<String> fakeServiceCallExample() {
+        return Flux.just("Ali")
+                .concatWith(fakeService.fakeServiceCall())
+                .onErrorMap(e -> {
+                    throw new RuntimeException("Error Occured");
+                });
+    }
 }
