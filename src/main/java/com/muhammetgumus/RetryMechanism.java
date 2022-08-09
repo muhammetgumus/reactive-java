@@ -2,12 +2,16 @@ package com.muhammetgumus;
 
 import lombok.NoArgsConstructor;
 import reactor.core.publisher.Flux;
+import reactor.util.retry.Retry;
+
+import java.time.Duration;
 
 @NoArgsConstructor
 public class RetryMechanism {
     public static void main(String[] args) {
         RetryMechanism rm = new RetryMechanism();
-        rm.fakeServiceCallRetryExample().subscribe();
+        //rm.fakeServiceCallRetryExample().subscribe();
+        rm.retryWhenExample().subscribe();
     }
 
     public Flux<String> fakeServiceCallRetryExample() {
@@ -21,10 +25,29 @@ public class RetryMechanism {
                 .retry(2);
     }
 
+    public Flux<String> retryWhenExample() {
+        return Flux.just("1", "2", "3", "4")
+                .retryWhen(retrySpecs())
+                //.doOnNext(e -> System.out.println("Current Element : " + e))
+                .map(e -> retryElementProcess(e))
+                .onErrorMap(e -> {
+                    throw new IllegalStateException("Er-Occurred");
+                })
+                .log();
+
+
+
+    }
+
     public String retryElementProcess(String element) {
         if ("3".equals(element)) {
-            throw new IllegalStateException("Illegal element!!");
+            throw new RuntimeException("Illegal element!!");
         }
         return element;
+    }
+
+    public Retry retrySpecs() {
+        System.out.println("Called retrySpecs");
+        return Retry.backoff(4, Duration.ofSeconds(3));//.filter(e -> e instanceof IllegalStateException);
     }
 }
