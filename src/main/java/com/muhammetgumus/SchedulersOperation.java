@@ -10,9 +10,11 @@ public class SchedulersOperation {
     static List<String> names1 = List.of("Adam", "Mike", "Kate");
     static List<String> names2 = List.of("Jane", "Alex", "Janet");
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         SchedulersOperation schedulersOperation = new SchedulersOperation();
-        schedulersOperation.publishOnExample().log().subscribe();
+        //schedulersOperation.publishOnExample().log().subscribe();
+        schedulersOperation.subscribeOn().subscribe();
+        Thread.sleep(100); //Added just to slow down the main thread and see the results of the parallel thread!
     }
 
     public Flux<String> publishOnExample() {
@@ -29,6 +31,22 @@ public class SchedulersOperation {
 
 
         return firstFlux.mergeWith(secondFlux);
+    }
+
+    public Flux<String> subscribeOn() {
+        //subscribeOn effects whole flow so that it is also effect upstream . But publishOn is effects downstream!
+        System.out.println("We are in the thread ==> \"" + Thread.currentThread().getName() + "\" at the first enter to the subscribeOn method!");
+        return Flux.fromIterable(names1)
+                .map(name -> {
+                    System.out.println("First Map value is : " + name + " and mapped from -> " + Thread.currentThread().getName());
+                    return name.toUpperCase();
+                })
+                .subscribeOn(Schedulers.parallel())
+                .map(name -> {
+                    System.out.println("Second Map value is : " + name + " and mapped from -> " + Thread.currentThread().getName());
+                    return name;
+                })
+                .log();
     }
 
     public String delayedUpperCase(String input) {

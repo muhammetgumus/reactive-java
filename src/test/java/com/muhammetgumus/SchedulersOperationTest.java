@@ -22,4 +22,14 @@ class SchedulersOperationTest {
                 .expectNextCount(6)
                 .verifyComplete();
     }
+
+    @Test
+    void subscribeOn() {
+        Mockito.when(schedulersOperation.subscribeOn()).thenCallRealMethod();
+
+        StepVerifier.create(schedulersOperation.subscribeOn())
+                .expectNext("ADAM","MIKE","KATE")
+                .verifyComplete();
+    }
+
 }
