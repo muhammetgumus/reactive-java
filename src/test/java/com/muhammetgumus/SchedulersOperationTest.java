@@ -8,6 +8,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import java.util.List;
+
 @ExtendWith(MockitoExtension.class)
 class SchedulersOperationTest {
 
@@ -28,8 +30,21 @@ class SchedulersOperationTest {
         Mockito.when(schedulersOperation.subscribeOn()).thenCallRealMethod();
 
         StepVerifier.create(schedulersOperation.subscribeOn())
-                .expectNext("ADAM","MIKE","KATE")
+                .expectNext("ADAM", "MIKE", "KATE")
                 .verifyComplete();
+    }
+
+    @Test
+    void blockingToNonBlocking() throws InterruptedException {
+        Mockito.when(schedulersOperation.fakeBlockingApiCalls()).thenReturn(List.of("Fake", "Api", "Data"));
+        Mockito.when(schedulersOperation.blockingToNonBlocking()).thenCallRealMethod();
+
+        StepVerifier.create(schedulersOperation.blockingToNonBlocking())
+                .consumeNextWith(element -> {
+                    assert (element.size() == 6);
+                })
+                .expectComplete()
+                .verify();
     }
 
 }
