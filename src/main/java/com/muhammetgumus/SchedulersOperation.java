@@ -4,6 +4,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,8 +21,9 @@ public class SchedulersOperation {
         SchedulersOperation schedulersOperation = new SchedulersOperation();
         //schedulersOperation.publishOnExample().log().subscribe();
         //schedulersOperation.subscribeOn().subscribe();
-        //Thread.sleep(100); //Added just to slow down the main thread and see the results of the parallel thread!
         schedulersOperation.blockingToNonBlocking().subscribe();
+        Thread.sleep(5000); //Added just to slow down the main thread and see the results of the parallel thread!
+        System.out.println("Main thread finished! ==> " + LocalDateTime.now() + "-" + Thread.currentThread().getName());
     }
 
     public Flux<String> publishOnExample() {
@@ -59,14 +61,16 @@ public class SchedulersOperation {
     public Flux<List<String>> blockingToNonBlocking() {
         //Be careful about return type of the fakeBlockingApiCalls(). It is not return Flux or Mono.
         return Flux.just(of("Reactor", "Java", "Example"))
-                .zipWith(Mono.fromCallable(() -> fakeBlockingApiCalls()), (firstList, secondList) -> {
-                    List<String> str = Stream.of(firstList, secondList)
-                            .flatMap(Collection::stream)
-                            .collect(Collectors.toList());
-                    return str;
-                })
+                .zipWith(Mono.fromCallable(() -> fakeBlockingApiCalls())
+                                .subscribeOn(Schedulers.boundedElastic()),
+                        (firstList, secondList) -> {
+                            List<String> str = Stream.of(firstList, secondList)
+                                    .flatMap(Collection::stream)
+                                    .collect(Collectors.toList());
+                            return str;
+                        })
                 .map(element -> {
-                    System.out.println(element);
+                    System.out.println(element + " - " + Thread.currentThread().getName());
                     return element;
                 })
                 .log();
