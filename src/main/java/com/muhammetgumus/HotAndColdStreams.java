@@ -45,6 +45,7 @@ public class HotAndColdStreams {
     public static void autoConnectExample() throws InterruptedException {
         //autoConnect() will emit values after reaching the min subscribers count
         Flux<Integer> flux = integerFluxWithDelay().publish().autoConnect(3);
+
         flux.subscribe(item -> {
             System.out.println("Subscriber 1: Item is : " + item);
         });
