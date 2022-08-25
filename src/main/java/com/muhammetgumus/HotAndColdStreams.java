@@ -1,5 +1,6 @@
 package com.muhammetgumus;
 
+import reactor.core.Disposable;
 import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
 
@@ -10,8 +11,9 @@ public class HotAndColdStreams {
         try {
             //coldStream();
             //hotStream();
-            autoConnectExample();
-            Thread.sleep(20000); //Added for test aim because of to see the all results until processes are done
+            //autoConnectExample();
+            refCountExample();
+            Thread.sleep(30000); //Added for test aim because of to see the all results until processes are done
         } catch (Exception e) {
             System.out.println("Error : " + e.getMessage());
         }
@@ -44,9 +46,12 @@ public class HotAndColdStreams {
 
     public static void autoConnectExample() throws InterruptedException {
         //autoConnect() will emit values after reaching the min subscribers count
-        Flux<Integer> flux = integerFluxWithDelay().publish().autoConnect(3);
+        Flux<Integer> flux = integerFluxWithDelay()
+                .doOnCancel(()-> System.out.println("Process cancelled!"))
+                .publish()
+                .autoConnect(3);
 
-        flux.subscribe(item -> {
+        Disposable disposable = flux.subscribe(item -> {
             System.out.println("Subscriber 1: Item is : " + item);
         });
 
@@ -54,15 +59,49 @@ public class HotAndColdStreams {
         Thread.sleep(3000);
         System.out.println("Second subscriber ready");
 
-        flux.subscribe(item -> {
+        Disposable disposable2 = flux.subscribe(item -> {
             System.out.println("Subscriber 2: Item is : " + item);
         });
 
         Thread.sleep(2000);
         System.out.println("Third subscriber ready");
-        flux.subscribe(item -> {
+        Disposable disposable3 = flux.subscribe(item -> {
             System.out.println("Subscriber 3: Item is : " + item);
         });
+    }
+
+    public static void refCountExample() throws InterruptedException {
+        Flux<Integer> hotSource = integerFluxWithDelay()
+                .doOnCancel(() -> {
+                    System.out.println("Process is canceled");
+                })
+                .publish()
+                .refCount(2);
+
+        Disposable disposable = hotSource.subscribe((item) -> {
+            System.out.println("Subscriber 1: Item - " + item);
+        });
+
+        Thread.sleep(2000);
+
+        Disposable disposable2 = hotSource.subscribe((item) -> {
+            System.out.println("Subscriber 2: Item - " + item);
+        });
+
+        Thread.sleep(3000);
+
+        //If just one of the dispose method would be called the other subscriber would still continue
+        //But if both of them will be commented then doOnCancel function would be called
+        disposable.dispose();
+        disposable2.dispose();
+
+        hotSource.subscribe((item) -> {
+            System.out.println("Subscriber 3: Item - " + item);
+        });
+        hotSource.subscribe((item) -> {
+            System.out.println("Subscriber 4: Item - " + item);
+        });
+
     }
 
     private static Flux<Integer> integerFlux() {
