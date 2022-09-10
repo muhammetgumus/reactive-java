@@ -21,4 +21,21 @@ class ProgrammaticallyFluxMonoCreationTest {
                 .expectNextCount(10)
                 .verifyComplete();
     }
+
+    @Test
+    void programmaticallyFluxCreation(){
+        Mockito.when(pfmc.programmaticallyFluxCreation()).thenCallRealMethod();
+        var flux = pfmc.programmaticallyFluxCreation();
+        StepVerifier.create(flux)
+                .expectNextCount(3)
+                .verifyComplete();
+    }
+    @Test
+    void programmaticallyFluxCreationWithAsync(){
+        Mockito.when(pfmc.programmaticallyFluxCreationWithAsync()).thenCallRealMethod();
+        var flux = pfmc.programmaticallyFluxCreationWithAsync();
+        StepVerifier.create(flux)
+                .expectNextCount(3)
+                .verifyComplete();
+    }
 }
