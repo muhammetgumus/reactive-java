@@ -38,4 +38,13 @@ class ProgrammaticallyFluxMonoCreationTest {
                 .expectNextCount(3)
                 .verifyComplete();
     }
+
+    @Test
+    void programmaticallyMonoCreate(){
+        Mockito.when(pfmc.programmaticallyMonoCreate()).thenCallRealMethod();
+        var mono = pfmc.programmaticallyMonoCreate();
+        StepVerifier.create(mono)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
 }

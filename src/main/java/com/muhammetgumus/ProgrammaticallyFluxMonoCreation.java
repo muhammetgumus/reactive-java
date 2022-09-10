@@ -1,6 +1,7 @@
 package com.muhammetgumus;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -35,6 +36,12 @@ public class ProgrammaticallyFluxMonoCreation {
                     })
                     .thenRun(sink::complete);
         }).log();
+    }
+
+    public Mono<String> programmaticallyMonoCreate(){
+        return Mono.create((sink)->{
+            sink.success("TestUser");
+        });
     }
 
     public static List<String> names() {
