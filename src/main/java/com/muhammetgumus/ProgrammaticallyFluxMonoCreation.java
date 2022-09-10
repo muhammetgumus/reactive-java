@@ -3,9 +3,7 @@ package com.muhammetgumus;
 import reactor.core.publisher.Flux;
 
 public class ProgrammaticallyFluxMonoCreation {
-    public static void main(String[] args) {
-
-    }
+    public static void main(String[] args) {}
 
     public Flux<Object> programmaticallyFluxGeneration() {
         return Flux.generate(() -> 1, (state, sink) -> {
